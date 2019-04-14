@@ -13,6 +13,16 @@
 (def another-profile (assoc public-profile :name "Alice Springs"))
 (def private-profile (assoc public-profile :private true))
 
+(def saved-profile (assoc
+                    public-profile
+                    :uuid
+                    (.toString (java.util.UUID/randomUUID))))
+
+(def connected-profile (assoc
+                        another-profile
+                        :connections
+                        [(:uuid saved-profile)]))
+
 (testing "profile-privacy"
   (deftest private-profile-privacy
     (is (private? private-profile)))
@@ -35,8 +45,19 @@
       (is (true? (contains? data-with-password :password-hash)))
       (is (false? (contains? data-with-password :password))))))
   
+(testing "connections-initializing"
+  (deftest init-empty-connections
+    (let [profile (with-connections public-profile)]
+      (is (instance? clojure.lang.Ref (:connections profile)))
+      (is (empty? @(:connections profile)))))
+
+  (deftest init-existing-collections
+    (let [profile (with-connections connected-profile)]
+      (is (instance? clojure.lang.Ref (:connections profile)))
+      (is (some? @(:connections profile))))))
+
 (deftest profiles-creation
   (let [profile (create-profile public-profile)]
     (is (instance? nukr.entities.profile.Profile profile))
-    (is (empty? (:connections profile)))
+    (is (instance? clojure.lang.Ref (:connections profile)))
     (is (false? (contains? profile :password)))))

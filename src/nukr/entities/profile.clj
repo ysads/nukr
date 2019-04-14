@@ -27,10 +27,21 @@
        (assoc profile :password-hash)
        (dissoc-plain-password)))
 
+(defn with-connections
+  "Returns a modified object where the connections field
+  is an instance of clojure.lang.Ref, which allows them
+  to be manipulated in a thread-safe way"
+  [profile]
+  (if (or (empty? (:connections profile))
+          (nil? (:connections profile)))
+    (assoc profile :connections (ref []))
+    (assoc profile :connections (ref (:connections profile)))))
+
 (defn create-profile
   "Returns an instance of Profile record based on
   data passed as argument"
   [profile-data]
   (-> profile-data
       (with-hashed-password)
+      (with-connections)
       (map->Profile)))
