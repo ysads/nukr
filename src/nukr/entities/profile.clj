@@ -34,8 +34,8 @@
   [profile]
   (if (or (empty? (:connections profile))
           (nil? (:connections profile)))
-    (assoc profile :connections (ref []))
-    (assoc profile :connections (ref (:connections profile)))))
+    (assoc profile :connections (ref #{}))
+    (assoc profile :connections (ref (into #{} (:connections profile))))))
 
 (defn create-profile
   "Returns an instance of Profile record based on
@@ -45,3 +45,21 @@
       (with-hashed-password)
       (with-connections)
       (map->Profile)))
+
+(defn connected?
+  "Returns true if profile-a is connected to profile-b.
+  Note the connection relation is undirectional, that is,
+  if profile-a is connected to profile-b then profile-b is
+  connected to profile-a"
+  [profile-a profile-b]
+  (-> (partial = (:uuid profile-b))
+      (some @(:connections profile-a))))
+
+(defn connect!
+  "Alters profile-a's connection list to include profile-b's
+  UUID, and vice-versa, so that they are connected after the
+  operation"
+  [profile-a profile-b]
+  (dosync
+    (alter (:connections profile-a) conj (:uuid profile-b))
+    (alter (:connections profile-b) conj (:uuid profile-a))))
