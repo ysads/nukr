@@ -37,6 +37,14 @@
     (assoc profile :connections (ref #{}))
     (assoc profile :connections (ref (into #{} (:connections profile))))))
 
+(defn with-privacy-settings
+  "Returns a modified object in which :private field is
+  set to false if it's not present in argument received"
+  [profile]
+  (if (some? (:private profile))
+    profile
+    (assoc profile :private false)))
+
 (defn create-profile
   "Returns an instance of Profile record based on
   data passed as argument"
@@ -44,6 +52,7 @@
   (-> profile-data
       (with-hashed-password)
       (with-connections)
+      (with-privacy-settings)
       (map->Profile)))
 
 (defn connected?
@@ -57,8 +66,7 @@
 
 (defn connect!
   "Alters profile-a's connection list to include profile-b's
-  UUID, and vice-versa, so that they are connected after the
-  operation"
+  UUID, and vice-versa, so they become connected"
   [profile-a profile-b]
   (dosync
     (alter (:connections profile-a) conj (:uuid profile-b))

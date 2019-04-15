@@ -1,5 +1,4 @@
 (ns nukr.entities.profile-test
-  (:use [clojure.pprint])
   (:require [clojure.test :refer :all]
             [nukr.entities.profile :refer :all]))
 
@@ -18,8 +17,7 @@
 (def public-profile {:name "John Doe"
                      :email "john.doe@example.com"
                      :password "123456"
-                     :gender "other"
-                     :private false})
+                     :gender "other"})
 
 (def private-profile (assoc public-profile :private true))
 (def another-profile (merge public-profile {:name "Alice Springs"
@@ -64,10 +62,25 @@
                        (remove nil?)
                        (empty?)))))))
 
+(testing "privacy-settings"
+  (deftest when-private-key-is-explicit
+    (let [pub-profile (assoc public-profile :private false)]
+      (is (-> (with-privacy-settings pub-profile)
+              (:private)
+              (false?))
+      (is (-> (with-privacy-settings private-profile)
+              (:private)
+              (true?))))))
+
+  (deftest when-privacy-missing
+    (let [profile (with-privacy-settings public-profile)]
+      (is (false? (:private profile))))))
+
 (deftest profiles-creation
   (let [profile (create-profile public-profile)]
     (is (instance? nukr.entities.profile.Profile profile))
     (is (instance? clojure.lang.Ref (:connections profile)))
+    (is (false? (:private profile)))
     (is (false? (contains? profile :password)))))
 
 (testing "connected?"
