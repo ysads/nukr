@@ -22,7 +22,7 @@
 (defn with-uuid
   "Assigns an UUID to data"
   [data]
-  (if (contains? data :uuid)
+  (if (some? (:uuid data))
     data
     (let [uuid (.toString (java.util.UUID/randomUUID))]
       (assoc data :uuid uuid))))
