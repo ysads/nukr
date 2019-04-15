@@ -51,5 +51,5 @@
     (->> (merge record updated-record)
          (swap! (:data storage)
                 assoc
-                (keyword (:uuid updated-record)))
-         updated-record)))
+                (keyword (:uuid updated-record))))
+    updated-record))
