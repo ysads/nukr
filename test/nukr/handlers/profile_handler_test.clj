@@ -22,9 +22,9 @@
 
 (testing "create-profile-handler"
   (testing "when request data is valid"
-  (let [response (create-profile-handler storage success-create-req)]
-    (is (= 201 (:status response)))
-    (is (some? (:uuid (:body response)))))))
+    (let [response (create-profile-handler storage success-create-req)]
+      (is (= 201 (:status response)))
+      (is (some? (:uuid (:body response)))))))
 
 (testing "privacy-changing-handler"
   (testing "returns 404 if profile not found"
