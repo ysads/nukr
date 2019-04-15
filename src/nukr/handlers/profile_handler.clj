@@ -1,6 +1,6 @@
 (ns nukr.handlers.profile-handler
   (:use [clojure.pprint])
-  (:require [nukr.entities.profile :refer [create-profile]]
+  (:require [nukr.entities.profile :refer [create-profile connect!]]
             [nukr.storage.in-memory :as db]
             [ring.util.http-response :refer [ok not-found created]])
   (:import java.util.NoSuchElementException)
@@ -24,17 +24,31 @@
 (defn with-privacy-set
   "Returns a profile with it's privacy set according the
   request setting"
-  [privacy profile]
-  (assoc profile :private privacy))
+  [private? profile]
+  (assoc profile :private private?))
 
 (defn opt-profile-privacy-handler
   "Toggles a profile privacy state, that is, set a profile
   as public if it's private or vice-versa"
-  [storage uuid privacy]
+  [storage uuid private?]
   (try
      (->> (db/get-by-uuid! storage uuid)
-          (with-privacy-set privacy)
+          (with-privacy-set private?)
           (db/update-by-uuid! storage)
           (ok))
      (catch NoSuchElementException ex
        (not-found))))
+
+(defn connect-profiles-handler
+  "Tag two profiles as connected, if they are not yet
+  connected. Otherwise, does nothing"
+  [storage uuid-a uuid-b]
+  (try
+    (let [profile-a (db/get-by-uuid! storage uuid-a)
+          profile-b (db/get-by-uuid! storage uuid-b)]
+      (connect! profile-a profile-b)
+      (db/update-by-uuid! storage profile-a)
+      (db/update-by-uuid! storage profile-b))
+      (ok)
+    (catch NoSuchElementException ex
+      (not-found))))

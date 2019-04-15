@@ -13,26 +13,45 @@
                          :password "123456"
                          :gender "other"})
 
-(deftest profile-creation-handling
+(defn stub-profile-uuid
+  "Stub a new profile using create-profile-handler"
+  [data]
+  (-> (create-profile-handler storage data)
+      (:body)
+      (:uuid)))
+
+(testing "create-profile-handler"
+  (testing "when request data is valid"
   (let [response (create-profile-handler storage success-create-req)]
     (is (= 201 (:status response)))
-    (is (some? (:uuid (:body response))))))
+    (is (some? (:uuid (:body response)))))))
 
-(testing "profile-privacy-opting"
-  (deftest opting-profile-not-found
+(testing "privacy-changing-handler"
+  (testing "returns 404 if profile not found"
     (let [response (opt-profile-privacy-handler storage "1234" true)]
       (is (= 404 (:status response)))))
 
-  (deftest opt-out-profile
-    (let [response (create-profile-handler storage success-create-req)
-          uuid (:uuid (:body response))]
+  (testing "when transition is public->private"
+    (let [uuid (stub-profile-uuid success-create-req)]
       (is (= 200 (:status (opt-profile-privacy-handler storage uuid true))))
       (is (->> (db/get-by-uuid! storage uuid)
                (private?)))))
 
-  (deftest opt-in-profile
-    (let [response (create-profile-handler storage success-create-req)
-          uuid (:uuid (:body response))]
+  (testing "when transition is private->public"
+    (let [uuid (stub-profile-uuid success-create-req)]
       (is (= 200 (:status (opt-profile-privacy-handler storage uuid false))))
       (is (not (->> (db/get-by-uuid! storage uuid)
                     (private?)))))))
+
+(testing "connect-profiles-handler"
+  (testing "returns 404 if any profile not found"
+    (is (= 404 (:status (connect-profiles-handler storage "1234" "4321")))))
+
+  (testing "when profiles are not connected"
+    (let [uuid-a (stub-profile-uuid success-create-req)
+          uuid-b (stub-profile-uuid success-create-req)]
+      (is (not (connected? (db/get-by-uuid! storage uuid-a)
+                           (db/get-by-uuid! storage uuid-b))))
+      (is (= 200 (:status (connect-profiles-handler storage uuid-a uuid-b))))
+      (is (connected? (db/get-by-uuid! storage uuid-a)
+                      (db/get-by-uuid! storage uuid-b))))))
