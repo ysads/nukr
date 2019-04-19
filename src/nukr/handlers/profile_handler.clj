@@ -1,6 +1,6 @@
 (ns nukr.handlers.profile-handler
   (:use [clojure.pprint])
-  (:require [nukr.entities.profile :refer [create-profile connect!]]
+  (:require [nukr.entities.profile :refer [create-profile connect! suggestions]]
             [nukr.storage.in-memory :as db]
             [ring.util.http-response :refer [ok not-found created]])
   (:import java.util.NoSuchElementException)
@@ -52,3 +52,26 @@
       (ok)
     (catch NoSuchElementException ex
       (not-found))))
+
+;;; The number of profile suggestions the handler must return
+;;; when this argument is not explicitly passed
+(def default-suggest-num 5)
+
+(defn suggestions->ok
+  "Returns a `200 ok` HTTP response containing a collection
+  of profile suggestions"
+  [suggestions]
+  (ok {:suggestions suggestions}))
+
+(defn suggestions-handler
+  "Returns a collection of connection suggestions for
+  a given profile based upon its existing connections"
+  ([storage uuid]
+   (suggestions-handler storage uuid default-suggest-num))
+  ([storage uuid n]
+   (try
+     (let [profile (db/get-by-uuid! storage uuid)]
+       (->> (suggestions storage profile n)
+            (suggestions->ok)))
+     (catch NoSuchElementException ex
+       (not-found)))))
