@@ -107,10 +107,9 @@
   at most num items, for a given profile"
   [storage root-prof n]
   (loop [num          n
-         queue        (conj PersistentQueue/EMPTY (:uuid root-prof)) ;; Use a queue to store the nodes we need to explore
-         visited      #{}                                          ;; A set to store the sequence of visited nodes
+         queue        (conj PersistentQueue/EMPTY (:uuid root-prof))
+         visited      #{(:uuid root-prof)}
          suggest-list []]
-
     (if (or (= num 0)
         (empty? queue))
       (sort-by :relevance > suggest-list)
@@ -118,7 +117,6 @@
             curr-prof (db/get-by-uuid! storage curr)
             conn      @(:connections curr-prof)
             new-queue (apply conj (pop queue) (not-visited conn visited))]
-
         (if-not (or (private? curr-prof)
                     (visited? visited curr)
                     (connected? curr-prof root-prof))

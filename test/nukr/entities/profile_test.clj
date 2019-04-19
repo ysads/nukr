@@ -220,6 +220,9 @@
 
         (testing "returns a coll with at most `max-suggest-num` items"
           (is (= max-suggest-num (count suggest-list))))
+
+        (testing "doesnt include root profile"
+          (is (every? #(not= (:uuid root) (:uuid %)) suggest-list)))
         
         (testing "returns only public profiles"
           (is (->> (map :profile suggest-list)
