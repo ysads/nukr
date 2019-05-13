@@ -6,13 +6,13 @@
 
   component/Lifecycle
 
-  (start [storage]
+  (start [this]
     (println ";; Starting database")
-    (assoc storage :data (atom {})))
+    (assoc this :data (atom {})))
 
-  (stop [storage]
+  (stop [this]
     (println ";; Stopping database")
-    (storage)))
+    (assoc this :data nil)))
 
 (defn init-storage
   "Initializes an empty in-memory storage"

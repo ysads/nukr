@@ -63,3 +63,15 @@
                (db/get-by-uuid! storage)
                (= record-updated))))))
 
+(testing "db/InMemoryStorage"
+  (let [component (db/init-storage)]
+    (testing ".start"
+      (let [started-component (.start component)]
+        (is (instance? clojure.lang.Atom (:data started-component)))
+        (is (empty? @(:data started-component)))))
+
+    (testing ".stop"
+      (let [stopped-component (.stop (.start component))]
+        (is (nil? (:data stopped-component)))))))
+  
+
