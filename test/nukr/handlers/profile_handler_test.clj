@@ -15,10 +15,15 @@
 ;;; a more real use scenario.
 (def storage (.start (db/init-storage)))
 
-(def success-create-req {:name "John Doe"
-                         :email "john.doe@example.com"
-                         :password "123456"
-                         :gender "other"})
+(def success-create-req {:form-params {:name "John Doe"
+                                       :email "john.doe@example.com"
+                                       :password "123456"
+                                       :gender "other"}})
+
+(defn stub-request
+  "Stub a request map with route-params key set"
+  [params]
+  {:route-params params})
 
 (defn stub-profile-uuid
   "Stub a new profile using create-profile-handler"
@@ -35,9 +40,12 @@
         uuid-b (stub-profile-uuid success-create-req)
         uuid-c (stub-profile-uuid success-create-req)
         uuid-d (stub-profile-uuid success-create-req)]
-    (connect-profiles-handler storage uuid-a uuid-b)
-    (connect-profiles-handler storage uuid-b uuid-c)
-    (connect-profiles-handler storage uuid-b uuid-d)
+    (->> (stub-request {:uuid-a uuid-a :uuid-b uuid-b})
+         (connect-profiles-handler storage))
+    (->> (stub-request {:uuid-a uuid-b :uuid-b uuid-c})
+         (connect-profiles-handler storage))
+    (->> (stub-request {:uuid-a uuid-b :uuid-b uuid-d})
+         (connect-profiles-handler storage))
     uuid-a))
 
 (defn suggestion?
@@ -52,33 +60,38 @@
       (is (= 201 (:status response)))
       (is (some? (:uuid (:body response)))))))
 
-(testing "privacy-changing-handler"
+(testing "opt-profile-handler"
   (testing "returns 404 if profile not found"
-    (let [response (opt-profile-privacy-handler storage "1234" true)]
+    (let [request (stub-request {:uuid "1234" :private true})
+          response (opt-profile-handler storage request)]
       (is (= 404 (:status response)))))
 
   (testing "when transition is public->private"
-    (let [uuid (stub-profile-uuid success-create-req)]
-      (is (= 200 (:status (opt-profile-privacy-handler storage uuid true))))
+    (let [uuid (stub-profile-uuid success-create-req)
+          request (stub-request {:uuid uuid :private true})]
+      (is (= 200 (:status (opt-profile-handler storage request))))
       (is (->> (db/get-by-uuid! storage uuid)
                (private?)))))
 
   (testing "when transition is private->public"
-    (let [uuid (stub-profile-uuid success-create-req)]
-      (is (= 200 (:status (opt-profile-privacy-handler storage uuid false))))
+    (let [uuid (stub-profile-uuid success-create-req)
+          request (stub-request {:uuid uuid :private false})]
+      (is (= 200 (:status (opt-profile-handler storage request))))
       (is (not (->> (db/get-by-uuid! storage uuid)
                     (private?)))))))
 
 (testing "connect-profiles-handler"
   (testing "returns 404 if either of profiles not found"
-    (is (= 404 (:status (connect-profiles-handler storage "1234" "4321")))))
+    (let [request (stub-request {:uuid-a "1234" :uuid-b "4321"})]
+      (is (= 404 (:status (connect-profiles-handler storage request))))))
 
   (testing "when profiles are not connected"
     (let [uuid-a (stub-profile-uuid success-create-req)
-          uuid-b (stub-profile-uuid success-create-req)]
+          uuid-b (stub-profile-uuid success-create-req)
+          request (stub-request {:uuid-a uuid-a :uuid-b uuid-b})]
       (is (not (connected? (db/get-by-uuid! storage uuid-a)
                            (db/get-by-uuid! storage uuid-b))))
-      (is (= 200 (:status (connect-profiles-handler storage uuid-a uuid-b))))
+      (is (= 200 (:status (connect-profiles-handler storage request))))
       (is (connected? (db/get-by-uuid! storage uuid-a)
                       (db/get-by-uuid! storage uuid-b))))))
 
@@ -87,11 +100,13 @@
     (is (= 5 default-suggest-num)))
 
   (testing "returns 404 if profile not found"
-    (is (= 404 (:status (suggestions-handler storage "1234")))))
+    (let [request (stub-request {:uuid "1234"})]
+      (is (= 404 (:status (suggestions-handler storage request))))))
 
   (testing "returns an array with at most n items when requested"
     (let [uuid (stub-connected-profile-uuid! storage)
-          response (suggestions-handler storage uuid 1)
+          request (stub-request {:uuid uuid :count 1})
+          response (suggestions-handler storage request)
           suggest-list (:suggestions (:body response))]
       (is (= 200 (:status response)))
       (is (= 1 (count suggest-list)))
@@ -99,7 +114,8 @@
 
   (testing "returns an array of suggestions of available suggestions"
     (let [uuid (stub-connected-profile-uuid! storage)
-          response (suggestions-handler storage uuid)
+          request (stub-request {:uuid uuid})
+          response (suggestions-handler storage request)
           suggest-list (:suggestions (:body response))]
       (is (= 200 (:status response)))
       (is (= 2 (count suggest-list)))
