@@ -63,7 +63,7 @@
                (db/get-by-uuid! storage)
                (= record-updated))))))
 
-(testing "db/InMemoryStorage"
+(testing "InMemoryStorage"
   (let [component (db/init-storage)]
     (testing ".start"
       (let [started-component (.start component)]
