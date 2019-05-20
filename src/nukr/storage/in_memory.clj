@@ -1,5 +1,6 @@
 (ns nukr.storage.in-memory
-  (:require [com.stuartsierra.component :as component])
+  (:require [clojure.tools.logging :as log]
+            [com.stuartsierra.component :as component])
   (:gen-class))
 
 (defrecord InMemoryStorage [data]
@@ -7,11 +8,11 @@
   component/Lifecycle
 
   (start [this]
-    (println ";; Starting database")
+    (log/info ";; InMemoryStorage: starting")
     (assoc this :data (atom {})))
 
   (stop [this]
-    (println ";; Stopping database")
+    (log/info ";; InMemoryStorage: stopping")
     (assoc this :data nil)))
 
 (defn init-storage
