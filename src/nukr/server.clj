@@ -15,6 +15,7 @@
   [storage]
   (-> (routes-handler storage)
       (wrap-keyword-params)
+      (wrap-params)
       (wrap-json-params)
       (wrap-json-response)))
 
