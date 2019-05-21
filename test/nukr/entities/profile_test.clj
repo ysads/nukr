@@ -26,7 +26,7 @@
 
 (def public-profile {:name "John Doe"
                      :email "john.doe@example.com"
-                     :password "123456"
+                     :password "NukR123@!#"
                      :gender "other"})
 
 (def private-profile (assoc public-profile :private true))
@@ -118,7 +118,7 @@
       (is (false? (contains? dissoc-data :password))))))
 
 (testing "profile/with-hashed-password"
-  (testing "throws exception if profile doesn't have passowrds"
+  (testing "throws exception if profile doesn't have password"
     (let [broken-data {:name "Elizabeth McQueen"}]
       (is (thrown? java.lang.NoSuchFieldError
                    (with-hashed-password broken-data)))))
