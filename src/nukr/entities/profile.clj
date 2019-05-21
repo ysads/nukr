@@ -100,7 +100,7 @@
   "Returns true if the given UUID is included in the
   visited collection"
   [visited curr-uuid]
-  (contains? visited curr-uuid))
+  (.contains visited curr-uuid))
 
 (defn suggestions
   "Returns a collection of suggested connections, with
@@ -128,4 +128,3 @@
                  new-queue
                  (conj visited curr)
                  suggest-list))))))
-
