@@ -21,7 +21,7 @@
 
 (def profile-data {:profile {:name "John Doe"
                              :email "john.doe@example.com"
-                             :password "123456"
+                             :password "NukR123@!#"
                              :gender "other"}})
 
 (def base-url "http://localhost:4000/profiles")
@@ -77,7 +77,7 @@
 
 (deftest routes-responses
   (testing "/profiles"
-    (let [url "http://localhost:4000/profiles"]
+    (let [url base-url]
       (testing "with valid body"
         (let [res  @(http/post url (with-request-options profile-data))
               body (parse-response-body res)]
@@ -101,7 +101,7 @@
 
     (testing "/profiles/:uuid/opt/:private"
       (testing "when transition is public->private"
-        (let [url  (str "http://localhost:4000/profiles/" uuid-a "/opt/true")
+        (let [url  (str base-url "/" uuid-a "/opt/true")
               res  @(http/post url (with-request-options))
               body (parse-response-body res)]
           (is (= 200 (:status res)))
@@ -110,7 +110,7 @@
                    (= "true")))))
 
       (testing "when transition is public->private"
-        (let [url  (str "http://localhost:4000/profiles/" uuid-a "/opt/false")
+        (let [url  (str base-url "/" uuid-a "/opt/false")
               res  @(http/post url (with-request-options))
               body (parse-response-body res)]
           (is (= 200 (:status res)))
@@ -119,7 +119,7 @@
                    (= "false")))))
 
       (testing "when UUID not found"
-        (let [url  "http://localhost:4000/profiles/12345/opt/true"
+        (let [url  (str base-url "/12345/opt/true")
               res  @(http/post url (with-request-options))]
           (is (= 404 (:status res))))))
 
@@ -159,5 +159,13 @@
               res  @(http/post url (with-request-options))
               body (parse-response-body res)]
           (is (= 200 (:status res)))
-          (is (= 1 (count (:suggestions body)))))))))
+          (is (= 1 (count (:suggestions body))))))))
+
+  (testing "undefined routes"
+    (let [res-a @(http/post (str base-url "/connect") (with-request-options))
+          res-b @(http/post (str base-url "/suggestions") (with-request-options))
+          res-c @(http/post (str base-url "/abc") (with-request-options))]
+      (is (= 404 (:status res-a)))
+      (is (= 404 (:status res-b)))
+      (is (= 404 (:status res-c))))))
 
