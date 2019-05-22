@@ -88,3 +88,10 @@
           b (tu/stub-profile another-profile)]
       (is (not (connected? a b)))
       (is (not (connected? b a))))))
+
+(testing "profile/deref-connections"
+  (testing "when profile connections is clojure.lang.Ref"
+    (let [profile    (tu/stub-profile connected-profile)
+          deref-prof (deref-connections profile)]
+      (is (not (instance? clojure.lang.Ref (:connections deref-prof))))
+      (is (= @(:connections profile) (:connections deref-prof))))))

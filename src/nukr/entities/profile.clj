@@ -74,3 +74,11 @@
   (dosync
     (alter (:connections profile-a) conj (:uuid profile-b))
     (alter (:connections profile-b) conj (:uuid profile-a))))
+
+(defn deref-connections
+  "Returns a profile with its connections attribute dereferenced.
+  This allows the object to be safely JSON-encoded."
+  [profile]
+  (if (instance? clojure.lang.Ref (:connections profile))
+    (update-in profile [:connections] deref)
+    profile))
