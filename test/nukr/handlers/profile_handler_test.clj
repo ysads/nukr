@@ -1,6 +1,7 @@
 (ns nukr.handlers.profile-handler-test
   (:use [clojure.pprint])
-  (:require [clojure.test :refer :all]
+  (:require [clojure.spec.alpha :as s]
+            [clojure.test :refer :all]
             [nukr.entities.profile :refer :all]
             [nukr.handlers.profile-handler :refer :all]
             [nukr.storage.in-memory :as db]
@@ -18,22 +19,26 @@
 (def success-create-req {:request-method :post
                          :params {:profile {:name "John Doe"
                                             :email "john.doe@example.com"
-                                            :password "123456"
+                                            :password "NukR123@!#"
                                             :gender "other"}}})
 
-(defn stub-request
+(def bad-emails    ["12345" "12345@com" "12345.com" 1234])
+(def bad-genders   ["m" "f" "o" \m :m 1])
+(def bad-passwords ["AbC1@" "Ab@D!E" "1A2B3C" "1@2!3#"])
+
+(defn- stub-request
   "Stub a request map with route-params key set"
   [params]
   {:params params})
 
-(defn stub-profile-uuid
+(defn- stub-profile-uuid
   "Stub a new profile using create-profile-handler"
   [data]
   (-> (create-profile-handler storage data)
       (:body)
       (:uuid)))
 
-(defn stub-connected-profile-uuid!
+(defn- stub-connected-profile-uuid!
   "Stub a graph representing a more realistic profile
   social network, including connections between people"
   [storage]
@@ -49,23 +54,65 @@
          (connect-profiles-handler storage))
     uuid-a))
 
-(defn suggestion?
+(defn- suggestion?
   "Returns true if the given map contains :relevance
   and :profile entries"
   [data]
   (and (contains? data :relevance)
        (contains? data :profile)))
 
+(testing "::profile-create-request spec"
+  (testing "fails if key is missing"
+    (doseq [k [:name :email :password :gender]]
+      (let [bad-req (update-in success-create-req [:params :profile] dissoc k)]
+        (is (not (s/valid? :nukr.handlers.profile-handler/profile-create-request
+                           bad-req))))))
+
+  (testing "fails for bad email"
+    (doseq [e bad-emails]
+      (let [bad-req (assoc-in success-create-req [:params :profile :email] e)]
+        (is (not (s/valid? :nukr.handlers.profile-handler/profile-create-request
+                           bad-req))))))
+
+  (testing "fails for invalid gender"
+    (doseq [g bad-genders]
+      (let [bad-req (assoc-in success-create-req [:params :profile :gender] g)]
+        (is (not (s/valid? :nukr.handlers.profile-handler/profile-create-request
+                           bad-req))))))
+
+  (testing "fails for invalid password"
+    (doseq [p bad-passwords]
+      (let [bad-req (assoc-in success-create-req [:params :profile :password] p)]
+        (is (not (s/valid? :nukr.handlers.profile-handler/profile-create-request
+                           bad-req))))))
+
+  (testing "success"
+    (s/explain :nukr.handlers.profile-handler/profile-create-request success-create-req)
+    (is (s/valid? :nukr.handlers.profile-handler/profile-create-request
+                  success-create-req))))
+
 (testing "create-profile-handler"
-  (testing "when password is missing"
-    (let [bad-req  (update-in success-create-req [:params :profile] dissoc :password)
-          response (create-profile-handler storage bad-req)]
-      (is (= 400 (:status response)))))
+  (testing "when an attribute is missing"
+    (doseq [k [:name :email :password :gender]]
+      (let [bad-req  (update-in success-create-req [:params :profile] dissoc k)
+            response (create-profile-handler storage bad-req)]
+        (is (= 400 (:status response))))))
 
   (testing "when request method is not POST"
     (let [bad-req  (assoc success-create-req :request-method :get)
           response (create-profile-handler storage bad-req)]
       (is (= 405 (:status response)))))
+
+  (testing "when request data is not valid"
+    (doseq [e bad-emails
+            g bad-genders
+            p bad-passwords]
+      (let [bad-req (-> success-create-req
+                        (update-in [:params :profile] assoc :email e)
+                        (update-in [:params :profile] assoc :gender g)
+                        (update-in [:params :profile] assoc :password p))
+            response (create-profile-handler storage bad-req)]
+        (is (= 400 (:status response))))))
 
   (testing "when request data is valid"
     (let [response (create-profile-handler storage success-create-req)]
