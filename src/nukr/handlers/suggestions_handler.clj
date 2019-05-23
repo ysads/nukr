@@ -1,5 +1,6 @@
 (ns nukr.handlers.suggestions-handler
-  (:require [nukr.entities.profile :as p]
+  (:require [clojure.tools.logging :as log]
+            [nukr.entities.profile :as p]
             [nukr.entities.suggestions :refer [find-suggestions]]
             [nukr.storage.in-memory :as db]
             [ring.util.http-response :refer [ok bad-request not-found created method-not-allowed]])
@@ -43,4 +44,5 @@
         (->> (find-suggestions storage profile num)
              (suggestions->ok)))
       (catch NoSuchElementException ex
+        (log/warn ex)
         (not-found)))))

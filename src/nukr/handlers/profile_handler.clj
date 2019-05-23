@@ -1,5 +1,6 @@
 (ns nukr.handlers.profile-handler
-  (:require [clojure.spec.alpha :as s]
+  (:require [clojure.tools.logging :as log]
+            [clojure.spec.alpha :as s]
             [nukr.entities.profile :refer [create-profile connect!]]
             [nukr.storage.in-memory :as db]
             [ring.util.http-response :refer [ok bad-request not-found created method-not-allowed]])
@@ -52,6 +53,7 @@
       (let [uuid (create-and-insert-profile! storage request)]
         (uuid->created uuid))
       (catch NoSuchFieldError ex
+        (log/warn ex)
         (bad-request)))
 
     :else
@@ -84,6 +86,7 @@
             (assoc {} :profile)
             (ok))
        (catch NoSuchElementException ex
+         (log/warn ex)
          (not-found)))))
 
 (defn connect-profiles-handler
@@ -99,4 +102,5 @@
         (db/update-by-uuid! storage profile-b))
         (ok)
       (catch NoSuchElementException ex
+        (log/warn ex)
         (not-found)))))
