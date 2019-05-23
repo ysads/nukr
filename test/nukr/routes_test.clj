@@ -12,7 +12,7 @@
   "Configures a complete and working system so that the
   tests can perform requests"
   [f]
-  (sys/init-system!)
+  (sys/init-system! sys/default-port)
   (sys/start!)
   (f)
   (sys/stop!))

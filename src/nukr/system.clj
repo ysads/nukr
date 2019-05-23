@@ -5,6 +5,9 @@
             [nukr.server :as server])
   (:gen-class))
 
+;;; The default port to which the system should be bound if
+;;; none is given as parameter
+(def default-port 4000)
 
 (def ^:redef system
   "The var which holds the system component"
@@ -13,20 +16,20 @@
 (defn build-system
   "Builds the system, initializing the components and defining
   the relations between them"
-  []
+  [port]
   (try
-    (-> (component/system-map :server (server/init-server 4000)
+    (-> (component/system-map :server (server/init-server port)
                               :storage (storage/init-storage))
         (component/system-using {:server [:storage]}))
     (catch Exception ex
       (log/error "Failed to build system"))))
 
-
 (defn init-system!
   "Associates the mounted main system component to the
   system var"
-  []
-  (let [sys (build-system)]
+  [port]
+  (let [final-port (or port default-port)
+        sys (build-system final-port)]
     (alter-var-root #'system (constantly sys))))
 
 (defn stop!
