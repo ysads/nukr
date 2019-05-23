@@ -137,18 +137,3 @@ To execute the test suite provided with the application, just run:
 ```
 $ lein test
 ```
-
-However, due to some issues described in the next session, the preferred way of executing the application is running tests on a per-namespace base, like this:
-
-```
-$ lein test [namespace]
-```
-
-## Known Issues
-
-During the development of the final solution, some issues arose. Aleph is a great server when compared to its counterparts, however it sometimes suffers from a weird issue when closing the server, as seen in issue [#365](https://github.com/ztellman/aleph/issues/365) of their official repository.
-
-Even though this issue doesn't occur always, it makes tricky and difficult to test the system components, since closing them may raise some exceptions. One solution to not mess with the entire test suite is to run each testing namespace into a different port, which makes closing the server unnecessary. Needless is to say this approach may suffer from a huge memory leak issue.
-
-A more simple and clean solution is to run each test namespace individually, what permits the server to be closed without problems. Thus, even though it's not the most convenient way to test an application, it certainly allows testing the whole application without worries.
-
