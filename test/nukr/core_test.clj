@@ -4,10 +4,16 @@
             [nukr.system :as sys]))
 
 (testing "core/-main"
-  (testing "when port is passed as arg"
-    (let [custom-port 4000]
+  (testing "when integer port is passed as arg"
+    (let [custom-port 12000]
       (-main custom-port)
-      (is (= custom-port (:port (:server sys/system))))
+      (is (= 12000 (:port (:server sys/system))))
+      (sys/stop!)))
+
+  (testing "when string port is passed as arg"
+    (let [custom-port "12000"]
+      (-main custom-port)
+      (is (= 12000 (:port (:server sys/system))))
       (sys/stop!)))
 
   (testing "when no arg is given"
