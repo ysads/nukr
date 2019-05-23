@@ -1,3 +1,3 @@
 # Introduction to nukr
 
-TODO: write [great documentation](http://jacobian.org/writing/what-to-write/)
+A prototype of social network built using functional programming techniques and features.
