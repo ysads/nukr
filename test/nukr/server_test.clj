@@ -8,7 +8,7 @@
 
 (def storage (.start (db/init-storage)))
 
-(def port 4000)
+(def port 5000)
 
 (testing "server/init-server"
   (let [http-server (init-server port)]
