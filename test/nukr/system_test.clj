@@ -7,9 +7,6 @@
   []
   (alter-var-root #'system (constantly nil)))
 
-(testing "system/system"
-  (is (nil? system)))
-
 (testing "system/build-system"
   (testing "builds system into given port"
     (let [port 12000
