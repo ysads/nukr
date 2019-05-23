@@ -6,11 +6,6 @@
 
 (def user-data {:name "John Doe" :age 25})
 
-(deftest initialization
-  (is (instance?
-       nukr.storage.in_memory.InMemoryStorage
-       storage)))
-
 (testing "in-memory/with-uuid"
   (testing "when data has UUID"
     (let [uuid (.toString (java.util.UUID/randomUUID))]
