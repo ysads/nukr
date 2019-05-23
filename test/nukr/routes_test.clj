@@ -24,6 +24,10 @@
                              :password "NukR123@!#"
                              :gender "other"}})
 
+(def bad-emails    ["12345" "12345@com" "12345.com" 1234])
+(def bad-genders   ["m" "f" "o" \m :m 1])
+(def bad-passwords ["AbC1@" "Ab@D!E" "1A2B3C" "1@2!3#"])
+
 (def base-url "http://localhost:4000/profiles")
 
 (defn with-request-options
@@ -53,7 +57,7 @@
   "Stub a valid profile UUID by creating a random profile
   using the API"
   []
-  (let [url "http://localhost:4000/profiles"
+  (let [url base-url
         res @(http/post url (with-request-options profile-data))
         body (parse-response-body res)]
     (:uuid body)))
@@ -91,8 +95,15 @@
           (is (= 405 (:status get-res)))))
 
       (testing "with bad body returns 400"
-        ;; after spec is implemented, go back here
-        )))
+        (doseq [e bad-emails
+                g bad-genders
+                p bad-passwords]
+          (let [bad-data (-> profile-data
+                             (update-in [:profile] assoc :email e)
+                             (update-in [:profile] assoc :gender g)
+                             (update-in [:profile] assoc :password p))
+                res  @(http/post url (with-request-options bad-data))]
+            (is (= 400 (:status res))))))))
 
   ;; Stub some UUIDs for the next calls so that they have their
   ;; pre-requirements to be tested
