@@ -9,6 +9,7 @@
                  [com.stuartsierra/component "0.4.0"]
                  [metosin/ring-http-response "0.9.1"]
                  [org.clojure/clojure "1.9.0"]
+                 [ring "1.7.1"]
                  [ring/ring-json "0.4.0"]]
   :user {:plugins [[venantius/ultra "0.6.0"]]}
   :main ^:skip-aot nukr.core

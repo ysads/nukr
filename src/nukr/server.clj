@@ -1,8 +1,8 @@
 (ns nukr.server
-  (:require [aleph.http :as http]
-            [clojure.tools.logging :as log]
+  (:require [clojure.tools.logging :as log]
             [com.stuartsierra.component :as component]
             [nukr.routes :refer [routes-handler]]
+            [ring.adapter.jetty :as http]
             [ring.middleware.json :refer [wrap-json-params wrap-json-response]]
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.params :refer [wrap-params]]
@@ -25,12 +25,12 @@
 
   (start [this]
     (log/info (str ";; HTTPServer: starting at port " port))
-    (->> (http/start-server (app (:storage this)) {:port port})
+    (->> (http/run-jetty (app (:storage this)) {:port port :join? false})
          (assoc this :server)))
 
   (stop [this]
     (log/info ";; HTTPServer: stopping")
-    (.close (:server this))
+    (.stop (:server this))
     (assoc this :server nil)))
 
 (defn init-server

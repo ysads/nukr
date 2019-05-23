@@ -22,7 +22,9 @@
     (testing ".start"
       (is (some? (:server started-server)))
       (is (some? (:storage started-server)))
-      (is (= port (.port (:server started-server)))))
+      (is (= port (-> (:server started-server)
+                      (.getURI)
+                      (.getPort)))))
 
     (testing ".stop"
       (let [stopped-server (.stop started-server)]

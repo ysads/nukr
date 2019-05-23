@@ -14,7 +14,7 @@
                      [["/" :uuid "/opt/" :private]      (partial opt-profile-handler storage)]
                      [["/" :uuid "/suggestions"]        (partial find-suggestions-handler storage)]
                      [["/connect/" :uuid-a "/" :uuid-b] (partial connect-profiles-handler storage)]]]
-        [true       (partial not-found)]]])
+        [true       (constantly {:status 404})]]])
 
 (defn routes-handler
   "Defines the matching handler for each route of the app"
