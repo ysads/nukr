@@ -1,5 +1,4 @@
 (ns nukr.handlers.test-utils
-  (:use [clojure.pprint])
   (:require [nukr.entities.profile :as p]
             [nukr.handlers.profile-handler :as ph]
             [nukr.storage.in-memory :as db]))

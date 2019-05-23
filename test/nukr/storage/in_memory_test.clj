@@ -1,5 +1,4 @@
 (ns nukr.storage.in-memory-test
-  (:use [clojure.pprint])
   (:require [clojure.test :refer :all]
             [nukr.storage.in-memory :as db]))
 

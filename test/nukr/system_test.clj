@@ -16,7 +16,7 @@
       (is (true? (contains? sys :storage))))))
 
 (testing "system/init-system"
-  (testing "inits upon the default port if nil"
+  (testing "inits upon the default port if none is given"
     (redef-system!)
     (is (nil? system))
     (init-system! nil)

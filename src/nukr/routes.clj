@@ -1,5 +1,4 @@
 (ns nukr.routes
-  (:use [clojure.pprint])
   (:require [bidi.ring :refer [make-handler]]
             [nukr.handlers.profile-handler :refer :all]
             [nukr.handlers.suggestions-handler :refer [find-suggestions-handler]]

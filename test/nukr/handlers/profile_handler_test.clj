@@ -1,5 +1,4 @@
 (ns nukr.handlers.profile-handler-test
-  (:use [clojure.pprint])
   (:require [clojure.spec.alpha :as s]
             [clojure.test :refer :all]
             [nukr.entities.profile :refer :all]

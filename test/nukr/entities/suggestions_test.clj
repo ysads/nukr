@@ -1,5 +1,4 @@
 (ns nukr.entities.suggestions-test
-  (:use [clojure.pprint])
   (:require [clojure.set :as set]
             [clojure.test :refer :all]
             [nukr.entities.profile :as p]

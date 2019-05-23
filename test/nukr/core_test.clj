@@ -5,10 +5,12 @@
 
 (testing "core/-main"
   (testing "when port is passed as arg"
-    (let [custom-port 7000]
+    (let [custom-port 4000]
       (-main custom-port)
-      (is (= custom-port (:port (:server sys/system))))))
+      (is (= custom-port (:port (:server sys/system))))
+      (sys/stop!)))
 
   (testing "when no arg is given"
     (-main)
-    (is (= sys/default-port (:port (:server sys/system))))))
+    (is (= sys/default-port (:port (:server sys/system))))
+    (sys/stop!)))

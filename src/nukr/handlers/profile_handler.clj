@@ -1,5 +1,4 @@
 (ns nukr.handlers.profile-handler
-  (:use [clojure.pprint])
   (:require [clojure.spec.alpha :as s]
             [nukr.entities.profile :refer [create-profile connect!]]
             [nukr.storage.in-memory :as db]

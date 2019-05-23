@@ -1,5 +1,4 @@
 (ns nukr.entities.test-utils
-  (:use [clojure.pprint])
   (:require [nukr.entities.profile :as p]
             [nukr.storage.in-memory :as db]))
 

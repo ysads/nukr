@@ -1,5 +1,4 @@
 (ns nukr.entities.profile-test
-  (:use [clojure.pprint])
   (:require [clojure.test :refer :all]
             [nukr.entities.profile :refer :all]
             [nukr.entities.test-utils :as tu]

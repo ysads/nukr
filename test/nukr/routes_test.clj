@@ -1,5 +1,4 @@
 (ns nukr.routes-test
-  (:use [clojure.pprint])
   (:require [aleph.http :as http]
             [bidi.bidi :refer [match-route]]
             [byte-streams :as bs]
@@ -8,11 +7,14 @@
             [clojure.walk :refer [keywordize-keys]]
             [nukr.system :as sys]))
 
+
+(def port 4000)
+
 (defn setup-system
   "Configures a complete and working system so that the
   tests can perform requests"
   [f]
-  (sys/init-system! sys/default-port)
+  (sys/init-system! port)
   (sys/start!)
   (f)
   (sys/stop!))
@@ -28,7 +30,7 @@
 (def bad-genders   ["m" "f" "o" \m :m 1])
 (def bad-passwords ["AbC1@" "Ab@D!E" "1A2B3C" "1@2!3#"])
 
-(def base-url "http://localhost:4000/profiles")
+(def base-url (str "http://localhost:" port "/profiles"))
 
 (defn with-request-options
   "Returns a map with options to be used by http-client
@@ -179,4 +181,3 @@
       (is (= 404 (:status res-a)))
       (is (= 404 (:status res-b)))
       (is (= 404 (:status res-c))))))
-

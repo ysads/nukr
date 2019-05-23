@@ -1,14 +1,12 @@
 (ns nukr.server-test
-  (:use [clojure.pprint])
   (:require [clojure.test :refer :all]
             [nukr.server :refer :all]
             [nukr.storage.in-memory :as db])
   (:gen-class))
 
+(def port 4000)
 
 (def storage (.start (db/init-storage)))
-
-(def port 5000)
 
 (testing "server/init-server"
   (let [http-server (init-server port)]
